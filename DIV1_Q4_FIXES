@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int inf=1e8;
+const int N=210;
+const ll mod=1000000007ll;
+int m[N];
+ll D[N];
+ll f[N];
+ll dp1[N][N];
+ll dp2[N];
+ll D1[N];
+ll dp[N][N][N];
+ll ans[N][N];
+ll ans1[N][N];
+void solve(){
+	int n;cin>>n;
+	for (int i=1;i<=n;i++) cin>>m[i];
+	D[0]=1;
+	f[0]=1;
+	D1[0]=1;
+	dp1[1][1]=1;
+	for (int i=1;i<=n;i++){
+		f[i]=f[i-1]*i%mod;
+	}
+	for (int j=2;j<=n;j++){
+		for (int t=1;t<=j;t++){
+			for (int g=0;g<j;g++){
+				dp1[j][t]+=dp1[g][t-1]*f[j-g-1];
+				dp1[j][t]%=mod;
+			}
+		}
+	}
+	for (int i=1;i<=n;i++){
+		D1[i]=f[i];
+		for (int j=1;j<i;j++){
+			D1[i]+=mod-D1[j]*f[i-j]%mod;
+			D1[i]%=mod;
+		}
+		D[i]=D1[i];
+		for (int t=2;t<i;t++){
+			D[i]+=mod-dp1[i][t]*D[t]%mod;
+			D[i]%=mod;
+		}
+		// cout<<i<<" "<<D1[i]<<" "<<D[i]<<endl;
+	}
+	// dp[l][r][t]
+	for (int i=1;i<=n;i++) {
+		dp[i][i][1]=1;
+		ans[i][i]=(m[i]<i);
+		ans[i+1][i]=1;
+		ans1[i][i]=(m[i]<i);
+		ans1[i+1][i]=1;
+	}
+	for (int len=2;len<=n;len++){
+		for (int l=1,r=len;r<=n;l++,r++){
+			for (int t=1;t<=len;t++){
+				for (int i=1;i<r;i++){
+					dp[l][r][t]+=dp[l][i][t-1]*ans[i+1][r-1];
+					dp[l][r][t]%=mod;
+				}
+			}
+			if (m[l]>=r) continue;
+			ans1[l][r]=0ll;
+			for (int t=2;t<=len;t++){
+				ans1[l][r]+=D[t]*dp[l][r][t];
+				ans1[l][r]%=mod;
+			}
+			ans[l][r]=ans1[l][r];
+			for (int i=l;i<r;i++){
+				ans[l][r]+=ans1[l][i]*ans[i+1][r];
+				ans[l][r]%=mod;
+			}
+		}
+	}
+	cout<<ans[1][n]<<'\n';
+
+	
+
+}
+int main()
+{
+	ios_base::sync_with_stdio(false);
+	cin.tie(0);
+	int tt=1;
+	while (tt--){
+		solve();
+	}
+	return 0;
+
+}
