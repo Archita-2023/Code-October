@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef vector<ll> vll;
+typedef vector<int> vint;
+typedef vector<vint> vvint;
+
+int read() {
+	int a = 0, b = 0; char c = getchar();
+	while (c < '0' || c > '9') b ^= (c == '-'), c = getchar();
+	while (c >= '0' && c <= '9') a = a * 10 - 48 + c, c = getchar();
+	return b ? -a : a;
+}
+
+struct dat { int x, y; };
+bool operator < (dat a, dat b) { return a.x == b.x ? a.y < b.y : a.x < b.x; }
+struct qwq { int x, y, m; };
+bool operator < (qwq a, qwq b) { return a.x == b.x ? (a.m == b.m ? a.y < b.y : a.m < b.m) : a.x < b.x; }
+
+map<qwq, map<dat,int> > as;
+
+void Q(int a, int b, int m) {
+	if (as.count({a, b, m})) return;
+	map<dat, int> mp; mp[{a, b}] = 0;
+	queue<dat> q; q.push({a, b});
+	while (q.size()) {
+		auto [x, y] = q.front(); q.pop();
+		int di = mp[{x, y}];
+		auto tes = [&](int x, int y) {
+			if (mp.count({x, y})) return;
+			mp[{x, y}] = di + 1; q.push({x, y});
+		};
+		tes(x | y, y);
+		tes(x & y, y);
+		tes(x, y ^ x);
+		tes(x, y ^ m);
+	}
+	as[{a, b, m}] = mp;
+}
+
+void sol() {
+	int a = read(), b = read(), c = read(), d = read(), m = read();
+	map<int, int> lim;
+	for (int i = 0; i < 30; ++i) {
+		int g1 = ((a >> i) & 1) * 4 + ((b >> i) & 1) * 2 + ((m >> i) & 1) * 1;
+		int g2 = ((c >> i) & 1) * 2 + ((d >> i) & 1);
+		if (lim.count(g1) && lim[g1] != g2) { cout << -1 << '\n'; return; }
+		lim[g1] = g2;
+	}
+	a = b = c = d = m = 0;
+	int k = 0;
+	for (auto [g1, g2] : lim) {
+		a |= (((g1 >> 2) & 1) << k);
+		b |= (((g1 >> 1) & 1) << k);
+		m |= (((g1 >> 0) & 1) << k);
+		c |= (((g2 >> 1) & 1) << k);
+		d |= (((g2 >> 0) & 1) << k);
+		++k;
+	}
+	Q(a, b, m);
+	auto &S = as[{a, b, m}];
+	cout << (S.count({c, d}) ? S[{c, d}] : -1) << '\n';
+}
+
+int main() {
+	int T = read();
+	while (T--) sol();
+	return 0;
+}
