@@ -1,0 +1,8 @@
+int a = read(), b = read(), c = read(), d = read(), m = read();
+	map<int, int> lim;
+	for (int i = 0; i < 30; ++i) {
+		int g1 = ((a >> i) & 1) * 4 + ((b >> i) & 1) * 2 + ((m >> i) & 1) * 1;
+		int g2 = ((c >> i) & 1) * 2 + ((d >> i) & 1);
+		if (lim.count(g1) && lim[g1] != g2) { cout << -1 << '\n'; return; }
+		lim[g1] = g2;
+	}
