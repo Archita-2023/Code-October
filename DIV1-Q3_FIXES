@@ -1,0 +1,124 @@
+#pragma GCC optimize("Ofast,fast-math,unroll-loops,no-stack-protector")
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define _print(x) \
+cerr << "Func " << __FUNCTION__ << ", " << "L" << __LINE__ << ": " << #x << " = " << x << '\n'
+#define _debug(_x, _args...) \
+fprintf(stderr, _x, _args)
+#define _my_assert(x) \
+	assert(x)
+
+
+const int mod = 998244353;
+
+template<class Fun>
+class y_combinator_result {
+	Fun fun_;
+public:
+	template<class T>
+	explicit y_combinator_result(T &&fun): fun_(std::forward<T>(fun)) {}
+
+	template<class ...Args>
+	decltype(auto) operator()(Args &&...args) {
+		return fun_(std::ref(*this), std::forward<Args>(args)...);
+	}
+};
+
+template<class Fun>
+decltype(auto) y_combinator(Fun &&fun) {
+	return y_combinator_result<std::decay_t<Fun>>(std::forward<Fun>(fun));
+}
+inline int inc(int x, int y) { x += y - mod; return x + (x >> 31 & mod); }
+inline int dec(int x, int y) { x -= y; return x + (x >> 31 & mod); }  
+inline int mul(int x, int y) { return 1ll * x * y % mod; }
+auto mul(const auto &first, const auto ...args) {
+	return mul(first, mul(args...));
+}
+
+inline void upd(int &x, int y) { x = inc(x, y); }
+inline void dpu(int &x, int y) { x = dec(x, y); }
+inline void pud(int &x, int y) { x = mul(x, y); }
+
+inline int fastpow(int x, int64_t p) {
+	int r = 1;
+	while (p) {
+		if (p & 1) pud(r, x);
+		pud(x, x);
+		p >>= 1;
+	}
+	return r;
+}
+
+constexpr int lowbit(int x) { return x & -x; }
+constexpr int lc(int o) { return o << 1; }
+constexpr int rc(int o) { return o << 1 | 1; }
+
+void chkmin(auto &a, auto b) { a = min(a, b); }
+void chkmax(auto &a, auto b) { a = max(a, b); }
+
+void yes() { cout << "yes\n"; }
+void Yes() { cout << "Yes\n"; }
+void YES() { cout << "YES\n"; }
+void no() { cout << "no\n"; }
+void No() { cout << "No\n"; }
+void NO() { cout << "NO\n"; }
+void impossible() { cout << "impossible\n"; }
+void Impossible() { cout << "Impossible\n"; }
+void IMPOSSIBLE() { cout << "IMPOSSIBLE\n"; }
+
+const int N = 5005;
+double c[N][N];
+
+void init() {
+	int n = 5000;
+	for (int i = 1; i <= n; ++i) {
+		c[i][0] = 1;
+		if (i == 1) continue;
+		for (int j = 1; j < i; ++j) {
+			c[i][j] += c[i - 2][j - 1] * (i - j - 1);
+		}
+		for (int j = 2; j < i; ++j) {
+			c[i][j] += c[i - 2][j - 2] * (j - 1);
+		}
+		for (int j = 0; j < i; ++j)
+			c[i][j] /= i;
+	}
+}
+
+void solve() {
+	int n, m;
+	cin >> n >> m;
+	vector<vector<int>> adj(n + 1);
+	vector<long double> f(n + 1);
+	for (int i = 0; i < m; ++i) {
+		int a, b;
+		cin >> a >> b;
+		adj[a].push_back(b);
+	}
+	f[n] = 1;
+	for (int i = n - 1; i >= 1; --i) {
+		vector<long double> vec;
+		int t = adj[i].size();
+		for (int j : adj[i])
+			vec.push_back(f[j]);
+		sort(vec.begin(), vec.end());
+		for (int j = 0; j < t; ++j) {
+			f[i] += vec[j] * c[t][t - j - 1];
+		}
+	}
+	cout << fixed << setprecision(20) << f[1] << '\n';
+}
+
+int main() {
+	init();
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	cout.tie(nullptr);
+	int T = 1;
+	cin >> T;
+	for (int _ = 1; _ <= T; ++_) {
+		solve();
+	}
+}
